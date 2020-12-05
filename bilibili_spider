@@ -1,0 +1,35 @@
+import requests
+
+import json
+
+def bilibili_spider(page):
+    '''爬取b站播放排名信息'''
+
+    # b站播放排名api地址  page第几页
+    url = 'https://api.bilibili.com/pgc/season/index/result?st=1&order=2' \
+          '&season_version=-1&area=-1&is_finish=-1&copyright=-1&season_status=-1' \
+          '&season_month=-1&year=-1&style_id=-1&sort=0&season_type=1&pagesize=20&type=1&page={}'
+
+    # 伪装请求头  UA浏览器标识
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36 Edg/85.0.564.68'
+    }
+
+    # 向url发送请求，并将响应得到的文本内容传给response
+    response = requests.get(url=url.format(page), headers=headers).text
+
+    # 将得到的json格式文本转字典
+    text_dict = json.loads(response)
+
+    # 在字典中找到含番剧信息列表
+    anime_dict = text_dict["data"]["list"]
+
+    # 遍历列表中包含信息的字典，将番剧名，播放量，和观看链接写入anime.txt文件
+    with open('anime.txt','a',encoding='utf-8') as f:
+        for anime in anime_dict:
+            f.write('%s,%s,%s\n'%(anime["title"], anime["order"],anime["link"]))
+
+if __name__ == '__main__':
+    # 爬取前5页
+    for index in range(5):
+        bilibili_spider(index+1)
